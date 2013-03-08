@@ -12,8 +12,11 @@
 	var ccyPair = "USD/CAD";
 
 	//The first value is the datex1000, the second value is the price
-	var askPrices = ([[1141948800000,27.17],[1142294400000,27.23],[1362156577400,67.36]]);
-	var bidPrices = ([[1141948800000,27.17],[1142294400000,27.23],[1362156577400,67.36]]);
+	//These are currently filled with demo values, but I assume you
+	//have an array of historical prices/data - or you can start with
+	//an empty array, and fill it as prices are ingested
+	var askPrices = ([[1141948800000,27.17],[1142294400000,27.23]]);
+	var bidPrices = ([[1141948800000,27.17],[1142294400000,27.23]]);
 	var abSeries = [{
 		 name:"Bid",
 		 data: bidPrices
@@ -21,6 +24,20 @@
 		 name:"Ask",
 		 data: askPrices
 	}];		
+
+	//INGEST DATA
+	var dataIngest = function(priceObj){
+		var bidPrice = priceObj.best_bid;
+		var bidDate = (priceObj.bids[0].arrival_time * 1000);
+		var bid = [bidDate,bidPrice];
+
+		var askPrice = priceObj.best_ask;
+		var askDate = (priceObj.asks[0].arrival_time * 1000);
+		var ask = [askDate,askPrice];
+
+		//ADD TO CHART
+		addPrice(bid,ask);
+	}
 	
 	//ADD PRICE FUNCTION	
 	var addPrice = function(bidPrice, askPrice){
@@ -69,12 +86,12 @@
 					},
 					tooltip: {
 						pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
-						valueDecimals: 2
+						valueDecimals: 5
 					},
 				series : data
 			});
 		});
-	};
+	}
 
 //CALL CHART FIRST TIME
 bfxPrice(abSeries, ccyPair, marketName);

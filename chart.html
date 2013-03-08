@@ -6,48 +6,87 @@
 
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
 		<script type="text/javascript">
-$(function() {
-	$.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=aapl-ohlc.json&callback=?', function(data) {
 
-		// create the chart
-		chart = new Highcharts.StockChart({
-			chart : {
-				renderTo : 'container'
-			},
+	//INITIAL CHART SETUP	
+	var marketName = "BARX";
+	var ccyPair = "USD/CAD";
 
-			rangeSelector : {
-				selected : 1
-			},
+	//The first value is the datex1000, the second value is the price
+	var askPrices = ([[1141948800000,27.17],[1142294400000,27.23],[1362156577400,67.36]]);
+	var bidPrices = ([[1141948800000,27.17],[1142294400000,27.23],[1362156577400,67.36]]);
+	var abSeries = [{
+		 name:"Bid",
+		 data: bidPrices
+	},{
+		 name:"Ask",
+		 data: askPrices
+	}];		
+	
+	//ADD PRICE FUNCTION	
+	var addPrice = function(bidPrice, askPrice){
+			bidPrices.push(bidPrice);
+			askPrices.push(askPrice);
+			abSeries = [{
+				 name:"Bid",
+				 data: bidPrices
+			},{
+				 name:"Ask",
+				 data: askPrices
+			}];		
+			bfxPrice(abSeries, ccyPair, marketName);
+		}
 
-			title : {
-				text : 'AAPL Stock Price'
-			},
-
-			series : [{
-				type : 'candlestick',
-				name : 'AAPL Stock Price',
-				data : data,
-				dataGrouping : {
-					units : [
-						['week', // unit name
-						[1] // allowed multiples
-					], [
-						'month', 
-						[1, 2, 3, 4, 6]]
-					]
-				}
-			}]
+	//CREATE CHART FUNCTION
+	var bfxPrice = function(data, ccy, market){	
+	$(function() {
+		var colors = Highcharts.getOptions().colors;
+			chart = new Highcharts.StockChart({
+					chart: {
+							renderTo: 'container'
+					},
+					rangeSelector: {
+							selected: 9
+					},
+					title : {
+						text : ccy+' Price stream, from '+market
+					},
+					yAxis: {
+						labels: {
+							formatter: function() {
+								return (this.value > 0 ? '+' : '') + this.value + '%';
+							}
+						},
+						plotLines: [{
+							value: 0,
+							width: 2,
+							color: 'silver'
+						}]
+					},
+					plotOptions: {
+						series: {
+							compare: 'percent'
+						}
+					},
+					tooltip: {
+						pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}</b> ({point.change}%)<br/>',
+						valueDecimals: 2
+					},
+				series : data
+			});
 		});
-	});
-});
+	};
 
-		</script>
-	</head>
+//CALL CHART FIRST TIME
+bfxPrice(abSeries, ccyPair, marketName);
+
+</script>
+
+</head>
 	<body>
-<script src="http://code.highcharts.com/stock/highstock.js"></script>
-<script src="http://code.highcharts.com/stock/modules/exporting.js"></script>
+	<script src="js/highstock.js"></script>
+	<script src="js/modules/exporting.js"></script>
 
-<div id="container" style="height: 500px; min-width: 500px"></div>
+	<div id="container" style="height: 500px; min-width: 500px"></div>
 	</body>
 </html>
 
